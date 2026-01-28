@@ -70,7 +70,26 @@ app.post('/generate-from-document', upload.single('document'), async (req, res) 
     }catch(error){
         console.log(error);
         res.status(500).json({message:error.message});
-        
     }
-
 });
+
+app.post('generate-from-audio', upload.single('audio'), async (req, res) => {
+    const { prompt } = req.body;
+    const base64Audio = req.file.buffer.toString('base64');
+
+    try{
+        const response=await ai.models.generateContent({
+            model:GEMINI_MODEL,
+            contents:[
+                {type:'text', text:prompt??'Tolong buatkan transkrip dari rekaman berikut'},
+                {inlineData:{data:base64Audio, mimeType:req.file.mimetype}}
+            ]
+        });
+        res.status(200).json({result:response.text});
+    }catch(error){  
+        console.log(error);
+        res.status(500).json({message:error.message})
+    }
+});
+
+
